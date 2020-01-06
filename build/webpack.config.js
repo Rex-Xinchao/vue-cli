@@ -1,14 +1,19 @@
 const path = require('path');
+// html模板配置
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+// vue文件解析
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
+// css编译
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+// 历史打包文件清空
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+// 是否dev环境
 const devMode = process.argv.indexOf('--mode=production') === -1;
 module.exports = {
-    entry: {
+    entry: { // 入口文件
         main: path.resolve(__dirname, '../src/index.js')
     },
-    output: {
+    output: { // 输出文件
         filename: '[name].[hash:8].js',
         path: path.resolve(__dirname, '../dist'),
         chunkFilename: 'js/[name].[hash:8].js'
@@ -38,11 +43,23 @@ module.exports = {
             },
             {
                 test: /\.css$/,
-                use: ['style-loader', 'css-loader']
+                use: [{
+                    loader: devMode ? 'vue-style-loader' : MiniCssExtractPlugin.loader,
+                    options: {
+                        publicPath: "../dist/css/",
+                        hmr: devMode
+                    }
+                }, 'css-loader']
             },
             {
                 test: /\.scss$/,
-                use: ['style-loader', 'css-loader', 'sass-loader']
+                use: [{
+                    loader: devMode ? 'vue-style-loader' : MiniCssExtractPlugin.loader,
+                    options: {
+                        publicPath: "../dist/css/",
+                        hmr: devMode
+                    }
+                }, 'css-loader', 'sass-loader']
             },
             {
                 test: /\.(jpe?g|png|gif)$/i,
@@ -50,7 +67,7 @@ module.exports = {
                     {
                         loader: 'url-loader',
                         options: {
-                            limit: 10240,
+                            limit: 10240, // 小于指定大小返回base64
                             fallback: {
                                 loader: 'file-loader',
                                 options: {
@@ -93,7 +110,7 @@ module.exports = {
         new CleanWebpackPlugin()
     ],
     resolve: {
-        alias: {
+        alias: { // 快捷路径设置
             'vue$': 'vue/dist/vue.runtime.esm.js',
             '@': path.resolve(__dirname, '../src'),
             '@component': path.resolve(__dirname, '../src/component'),
